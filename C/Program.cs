@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 
 namespace C
 {
@@ -16,51 +18,72 @@ namespace C
         static void Main(string[] args)
         {
 
-            //var minimunSum = 304;
-            //StreamWriter writer = new StreamWriter(Path.Combine(ProjectPath, "log.txt"));
-            //for (int i = 1; i <= 16; i++)
-            //{
-            //    var sw = new Stopwatch();
-            //    sw.Start();
-            //    long totalCount = 0;
+            var minimunSum = 2250;
+            StreamWriter writer = new StreamWriter(Path.Combine(ProjectPath, "log.txt"));
+            var sw = new Stopwatch();
+            sw.Start();
+            long totalCount = 0;
 
-            //    writer.WriteLine($"C({inputC.Length}, {i}) x C({inputA.Length}, 2) x C({inputB.Length}, 2)");
-            //    Console.WriteLine($"C({inputC.Length}, {i}) x C({inputA.Length}, 2) x C({inputB.Length}, 2)");
+            Console.WriteLine($"C(32, 16) x C(4, 2) x C(4, 2)");
+            var currSum = 0;
+            (int[], int[], int[]) final = (new int[]{ }, new int[] { }, new int[] { });
 
-            //    foreach (var CA in C(inputA, 2))
-            //    {
-            //        foreach (var CB in C(inputB, 2))
-            //        {
-            //            foreach (var CC in C(inputC, i))
-            //            {
-            //                totalCount++;
-            //                if (totalCount % 10000000 == 0)
-            //                {
-            //                    Console.Write(".");
-            //                }
-            //            }
-            //        }
-            //    }
-            //    sw.Stop();
+            var isBreak = false;
+            foreach (var CA in C(inputA, 2))
+            {
+                if (isBreak) break;
+                foreach (var CB in C(inputB, 2))
+                {
+                    if (isBreak) break;
+                    foreach (var CC in C(inputC, 16))
+                    {
+                        totalCount++;
+                        if (totalCount % 10000000 == 0)
+                        {
+                            Console.Write(".");
+                        }
+                        var total = CC.Sum() + CB.Sum() + CA.Sum();
 
-            //    writer.WriteLine();
-            //    writer.WriteLine($"TotalConbinationCount: {totalCount}");
-            //    writer.WriteLine($"End: {sw.Elapsed.TotalSeconds} seconds");
-            //    writer.WriteLine($"======================");
-            //    writer.Flush();
+                        if (total > minimunSum) 
+                        {
+                            if (currSum == 0 || currSum > total) 
+                            {
+                                currSum = total;
+                                final = (CA, CB, CC);
+                            }
+                            else 
+                            {
+                                isBreak = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
 
-            //    Console.WriteLine();
-            //    Console.WriteLine($"TotalConbinationCount: {totalCount}");
-            //    Console.WriteLine($"End: {sw.Elapsed.TotalSeconds} seconds");
-            //    Console.WriteLine($"======================");
-            //}
+            Console.WriteLine();
+            Console.WriteLine(JsonSerializer.Serialize(final.Item1)+ JsonSerializer.Serialize(final.Item2) + JsonSerializer.Serialize(final.Item3));
 
-            Test();
+            sw.Stop();
+
+            //writer.WriteLine();
+            //writer.WriteLine($"Sum: {currSum}");
+            //writer.WriteLine($"TotalConbinationCount: {totalCount}");
+            //writer.WriteLine($"End: {sw.Elapsed.TotalSeconds} seconds");
+            //writer.WriteLine($"======================");
+            //writer.Flush();
+
+            Console.WriteLine();
+            Console.WriteLine($"Sum: {currSum}");
+            //Console.WriteLine($"TotalConbinationCount: {totalCount}");
+            Console.WriteLine($"End: {sw.Elapsed.TotalSeconds} seconds");
+            Console.WriteLine($"======================");
+
+            //Test();
         }
 
         static IEnumerable<int[]> C(int[] nums, int count)
         {
-
             int[] indexes = new int[count];
             Init(indexes);
 
@@ -68,6 +91,7 @@ namespace C
             int indexsLength = indexes.Length;
 
             int matchedLast = 0;
+
             while (true)
             {
                 // 若 index 還能移動
@@ -77,7 +101,7 @@ namespace C
                     indexes[indexsLength - matchedLast - 1]++;
                     for (int i = indexsLength - matchedLast; i < indexsLength; i++)
                     {
-                        // 中間的 arget index 之後的 index 都往 target index 右邊一步
+                        // 中間的 target index 之後的 index 都往 target index 右邊一步
                         indexes[i] = indexes[i - 1] + 1;
                     }
 
@@ -130,7 +154,7 @@ namespace C
             int totalCount;
             int matchedCount;
 
-            for (int i = 1; i <= inputC.Length; i++)
+            for (int i = 16; i <= 16; i++)
             {
                 Console.WriteLine($"C({inputC.Length}, {i})");
 
